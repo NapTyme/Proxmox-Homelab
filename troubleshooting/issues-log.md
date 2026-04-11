@@ -19,7 +19,7 @@ Each entry follows this structure:
 
 ## Log
 
-### 2026-04-03 — Proxmox network interfaces showing DOWN
+### 03-04-2026 — Proxmox network interfaces showing DOWN
 **Problem:** After fresh Proxmox install, ran `ip a` and both nic0 and vmbr0 showed state DOWN. No network connectivity.
 **What I tried:** Checked IP config, re-ran `ip a`
 **Root cause:** Ethernet cable was not physically connected to the machine
@@ -28,7 +28,7 @@ Each entry follows this structure:
 
 ---
 
-### 2026-04-03 — Wrong IP subnet after install
+### 03-04-2026 — Wrong IP subnet after install
 **Problem:** Proxmox assigned itself 192.168.100.2 but home network is 192.168.1.x — couldn't reach it from browser
 **What I tried:** Checked ip a output
 **Root cause:** Installer defaulted to 192.168.100.x range, possibly because network was not connected during install
@@ -37,7 +37,7 @@ Each entry follows this structure:
 
 ---
 
-### 2026-04-03 — apt update failing with DNS resolution errors
+### 03-04-2026 — apt update failing with DNS resolution errors
 **Problem:** `apt update` returned "Temporary failure resolving" for all repos
 **What I tried:** Checked network connectivity
 **Root cause:** No DNS server configured on the Proxmox machine
@@ -46,7 +46,7 @@ Each entry follows this structure:
 
 ---
 
-### 2026-04-03 — SSL certificate verification failures on apt update
+### 03-04-2026 — SSL certificate verification failures on apt update
 **Problem:** After DNS was fixed, apt update still failing with "not live until 2026-03-14" SSL errors
 **What I tried:** Re-ran apt update multiple times
 **Root cause:** System clock was set to 2025 instead of 2026. SSL certificates have validity windows — if your clock is outside that window, verification fails.
@@ -55,7 +55,7 @@ Each entry follows this structure:
 
 ---
 
-### 2026-04-03 — wipefs failing on sdb with "device or resource busy"
+### 03-04-2026 — wipefs failing on sdb with "device or resource busy"
 **Problem:** Tried to wipe sdb for repurposing but got "probing initialization failed: Device or resource busy"
 **What I tried:** Running wipefs directly
 **Root cause:** Old Proxmox LVM volume group (pve-OLD-BBC9EC96) from previous install was still active and holding the device
@@ -64,8 +64,7 @@ Each entry follows this structure:
 
 ---
 
-### 2026-04-11 — Ubuntu Server installer crashing during VM creation
-
+### 11-04-2026 — Ubuntu Server installer crashing during VM creation
 **Problem:** Ubuntu Server installer was crashing repeatedly during installation inside the new VM (ID 100)
 **What I tried:** Attempted install with initial low resource allocation
 **Root cause:** Insufficient resources allocated to the VM during the installation process — the Ubuntu live installer needs more RAM than the installed system does to run
@@ -74,8 +73,7 @@ Each entry follows this structure:
 
 ---
 
-### 2026-04-11 — QEMU guest agent installed but not running
-
+### 11-04-2026 — QEMU guest agent installed but not running
 **Problem:** Installed `qemu-guest-agent` inside the VM and attempted to start it, but `systemctl status` showed it as inactive
 **What I tried:** `sudo systemctl start qemu-guest-agent.service` — service appeared to start but wasn't functioning
 **Root cause:** The QEMU Guest Agent feature was disabled in the VM's Options tab in Proxmox. The guest-side service and the host-side option both need to be enabled for the agent to work
