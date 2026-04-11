@@ -65,6 +65,7 @@ Each entry follows this structure:
 ---
 
 ### 11-04-2026 — Ubuntu Server installer crashing during VM creation
+
 **Problem:** Ubuntu Server installer was crashing repeatedly during installation inside the new VM (ID 100)
 **What I tried:** Attempted install with initial low resource allocation
 **Root cause:** Insufficient resources allocated to the VM during the installation process — the Ubuntu live installer needs more RAM than the installed system does to run
@@ -74,8 +75,20 @@ Each entry follows this structure:
 ---
 
 ### 11-04-2026 — QEMU guest agent installed but not running
+
 **Problem:** Installed `qemu-guest-agent` inside the VM and attempted to start it, but `systemctl status` showed it as inactive
 **What I tried:** `sudo systemctl start qemu-guest-agent.service` — service appeared to start but wasn't functioning
 **Root cause:** The QEMU Guest Agent feature was disabled in the VM's Options tab in Proxmox. The guest-side service and the host-side option both need to be enabled for the agent to work
 **Fix:** Enabled QEMU Guest Agent in the VM's Options tab in the Proxmox UI, then restarted the VM. The setting showed in orange before restart (Proxmox's indicator for pending changes). After restart, `systemctl status qemu-guest-agent.service` confirmed it was active and running
 **What I learned:** Proxmox settings highlighted in orange are pending — they won't take effect until the VM is restarted. Also, software installed inside a VM and features configured on the Proxmox host side are two separate things that both need to be in place.
+
+
+---
+
+### 11-04-2026 — systemd service failed to start with status=203/EXEC
+
+**Problem:** After creating the `aimorderchange.service` systemd unit file for Gunicorn, `sudo systemctl start aimorderchange` failed immediately with `status=203/EXEC`
+**What I tried:** Started the service with `systemctl start`, checked status
+**Root cause:** Typo in the `ExecStart` path inside the service file — path was written as `/AimOrderChangeRequest/venv/bin/gunicorn` instead of the full absolute path `/home/naptyme/AimOrderChangeRequest/venv/bin/gunicorn`. Systemd couldn't locate the binary.
+**Fix:** Re-opened the service file with `sudo nano`, corrected the full path, ran `sudo systemctl daemon-reload` to reload the updated file, then started the service again successfully
+**What I learned:** Systemd `status=203/EXEC` means the binary in `ExecStart` cannot be found or executed — always use full absolute paths in service files. After editing any service file you must run `systemctl daemon-reload` before the changes take effect.
