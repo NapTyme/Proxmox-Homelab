@@ -61,3 +61,23 @@ Each entry follows this structure:
 **Root cause:** Old Proxmox LVM volume group (pve-OLD-BBC9EC96) from previous install was still active and holding the device
 **Fix:** Listed volume groups with `vgs`, deactivated the old one with `vgchange -an pve-OLD-BBC9EC96`, then wipefs succeeded
 **What I learned:** LVM volume groups can hold drives busy even if the OS isn't actively using them. Always deactivate VGs before trying to repartition a drive that previously had LVM on it.
+
+---
+
+### 2026-04 — Ubuntu Server installer crashing during VM creation
+
+**Problem:** Ubuntu Server installer was crashing repeatedly during installation inside the new VM (ID 100)
+**What I tried:** Attempted install with initial low resource allocation
+**Root cause:** Insufficient resources allocated to the VM during the installation process — the Ubuntu live installer needs more RAM than the installed system does to run
+**Fix:** Temporarily increased VM resources to 3GB RAM, 2 sockets, 2 cores for the duration of the install. After installation completed successfully, scaled back down to 1GB RAM, 1 socket, 1 core
+**What I learned:** The resources needed to *run* an OS installer are often higher than what the installed system needs day-to-day. It's good practice to over-provision during install and scale back after.
+
+---
+
+### 2026-04 — QEMU guest agent installed but not running
+
+**Problem:** Installed `qemu-guest-agent` inside the VM and attempted to start it, but `systemctl status` showed it as inactive
+**What I tried:** `sudo systemctl start qemu-guest-agent.service` — service appeared to start but wasn't functioning
+**Root cause:** The QEMU Guest Agent feature was disabled in the VM's Options tab in Proxmox. The guest-side service and the host-side option both need to be enabled for the agent to work
+**Fix:** Enabled QEMU Guest Agent in the VM's Options tab in the Proxmox UI, then restarted the VM. The setting showed in orange before restart (Proxmox's indicator for pending changes). After restart, `systemctl status qemu-guest-agent.service` confirmed it was active and running
+**What I learned:** Proxmox settings highlighted in orange are pending — they won't take effect until the VM is restarted. Also, software installed inside a VM and features configured on the Proxmox host side are two separate things that both need to be in place.
