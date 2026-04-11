@@ -78,28 +78,27 @@ These "aha moment" notes are gold for interviews. When someone asks "explain how
 
 ---
 
-### Containers vs Virtual Machines
+### Flask Production Deployment Stack
 
-**The core difference — resource handling:**
+**The pattern:** For a Python web app, you don't just run `python app.py` in production. The standard stack is:
 
-A VM *allocates* resources to itself — when you give a VM 2 cores and 3GB of RAM, those resources are reserved for that VM. It owns them.
+```
+Browser → Reverse Proxy (Apache/Nginx) → WSGI Server (Gunicorn) → Flask app
+```
 
-A container sets a *limit* on resources — it can use up to its limit, but those resources aren't exclusively reserved. Multiple containers share the underlying system's resources, and none can exceed their cap.
+Each layer has a specific job:
 
-This difference flows from something deeper: containers share the host's kernel, meaning they don't run a full separate operating system — they're more like isolated processes. VMs, by contrast, run their own complete OS on top of the hypervisor, which is why they need dedicated resources and take longer to boot.
+- **Flask** — the application itself. Handles routes, logic, responses. Not designed to serve traffic directly.
+- **Gunicorn** — a WSGI server. Translates HTTP requests into something Flask understands, and handles concurrency. Runs on a port (5000 in this case).
+- **Apache** — sits on port 80 (standard HTTP) and forwards requests to Gunicorn. The public-facing entry point. Handles SSL termination, security, and routing independently of the app code.
 
-**Migration:**
-- VMs can be *live migrated* to another host — moved while running, with no downtime
-- Containers must be shut down, moved, and restarted — no live migration
+**Netplan** is Ubuntu's network configuration tool. Settings live in YAML files under `/etc/netplan/`. Switching from DHCP to static means setting `dhcp4: no` and manually specifying address, gateway, and DNS. `sudo netplan apply` applies changes without a reboot. You can confirm it worked with `ip a` — a static address shows `valid_lft forever` instead of a DHCP lease timer.
 
-**When to use which:**
-- VMs: when you need full OS isolation, Windows, or a different kernel (e.g. running a Windows Server alongside Linux)
-- Containers: when you want something lightweight and fast to spin up, and the workload doesn't need a full OS
+**Systemd services** are how Linux manages persistent background processes — the same way Apache, SSH, and every other system service works. The unit file defines what binary to run, as which user, from which directory, and what to do on crash. Key fields:
+- `After=network.target` — don't start until the network is up
+- `Restart=always` — auto-recover from any crash
+- `WantedBy=multi-user.target` — start at boot in normal multi-user mode
 
----
+After writing or editing a service file, always run `sudo systemctl daemon-reload` before starting it.
 
-### QEMU Guest Agent
-
-The QEMU guest agent is a small service that runs *inside* the VM and creates a communication channel between the VM's operating system and the Proxmox host. Without it, Proxmox can only see the VM from the outside — with it running, Proxmox can do things like cleanly shut down the guest OS, get the VM's IP address, and freeze the filesystem for consistent snapshots.
-
-**Key lesson from setup:** Even after installing and starting the `qemu-guest-agent` service inside the VM, it won't actually connect unless the feature is also *enabled* in the VM's Options tab in the Proxmox UI. The setting showed in orange after enabling it — orange in Proxmox means the change is pending and will take effect after the next VM restart. After restarting, `systemctl status qemu-guest-agent.service` confirmed it was running.
+**Python virtual environments** isolate a project's dependencies from the system Python installation. `python3 -m venv venv` creates the environment, `source venv/bin/activate` enters it. Dependencies installed inside only affect that project — prevents version conflicts across multiple apps.
