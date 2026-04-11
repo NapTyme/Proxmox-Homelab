@@ -75,3 +75,31 @@ These "aha moment" notes are gold for interviews. When someone asks "explain how
 ---
 
 *Add new concepts here as you learn them*
+
+---
+
+### Containers vs Virtual Machines
+
+**The core difference — resource handling:**
+
+A VM *allocates* resources to itself — when you give a VM 2 cores and 3GB of RAM, those resources are reserved for that VM. It owns them.
+
+A container sets a *limit* on resources — it can use up to its limit, but those resources aren't exclusively reserved. Multiple containers share the underlying system's resources, and none can exceed their cap.
+
+This difference flows from something deeper: containers share the host's kernel, meaning they don't run a full separate operating system — they're more like isolated processes. VMs, by contrast, run their own complete OS on top of the hypervisor, which is why they need dedicated resources and take longer to boot.
+
+**Migration:**
+- VMs can be *live migrated* to another host — moved while running, with no downtime
+- Containers must be shut down, moved, and restarted — no live migration
+
+**When to use which:**
+- VMs: when you need full OS isolation, Windows, or a different kernel (e.g. running a Windows Server alongside Linux)
+- Containers: when you want something lightweight and fast to spin up, and the workload doesn't need a full OS
+
+---
+
+### QEMU Guest Agent
+
+The QEMU guest agent is a small service that runs *inside* the VM and creates a communication channel between the VM's operating system and the Proxmox host. Without it, Proxmox can only see the VM from the outside — with it running, Proxmox can do things like cleanly shut down the guest OS, get the VM's IP address, and freeze the filesystem for consistent snapshots.
+
+**Key lesson from setup:** Even after installing and starting the `qemu-guest-agent` service inside the VM, it won't actually connect unless the feature is also *enabled* in the VM's Options tab in the Proxmox UI. The setting showed in orange after enabling it — orange in Proxmox means the change is pending and will take effect after the next VM restart. After restarting, `systemctl status qemu-guest-agent.service` confirmed it was running.
