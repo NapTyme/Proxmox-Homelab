@@ -64,7 +64,7 @@ Each entry follows this structure:
 
 ---
 
-### 2026-04 — Ubuntu Server installer crashing during VM creation
+### 2026-04-11 — Ubuntu Server installer crashing during VM creation
 
 **Problem:** Ubuntu Server installer was crashing repeatedly during installation inside the new VM (ID 100)
 **What I tried:** Attempted install with initial low resource allocation
@@ -74,7 +74,7 @@ Each entry follows this structure:
 
 ---
 
-### 2026-04 — QEMU guest agent installed but not running
+### 2026-04-11 — QEMU guest agent installed but not running
 
 **Problem:** Installed `qemu-guest-agent` inside the VM and attempted to start it, but `systemctl status` showed it as inactive
 **What I tried:** `sudo systemctl start qemu-guest-agent.service` — service appeared to start but wasn't functioning
