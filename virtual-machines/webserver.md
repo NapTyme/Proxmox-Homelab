@@ -63,6 +63,10 @@ systemctl status qemu-guest-agent.service
 sudo apt install apache2
 ```
 
+Confirmed working by visiting `http://192.168.1.120` in the browser — Apache default page displayed.
+
+![Apache default page confirming server is up](../photos/11-04-2026_apache-default-page.png)
+
 ---
 
 ## Flask App Deployment
@@ -191,6 +195,8 @@ sudo systemctl reload apache2
 ## Outcome
 
 Flask app accessible at `http://192.168.1.120` from any device on the home network. No port number required. Service survives reboots automatically via systemd.
+
+![AIM Change Request app running at http://192.168.1.120](../photos/11-04-2026_aim-change-request-running.png)
 
 ---
 
